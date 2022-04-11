@@ -1,5 +1,8 @@
 package com.kreitek.editor;
 
+import com.kreitek.editor.Format.FactoryFormat;
+import com.kreitek.editor.Format.Format;
+import com.kreitek.editor.Format.SelectionFormat;
 import com.kreitek.editor.commands.CommandFactory;
 
 import java.util.ArrayList;
@@ -20,7 +23,7 @@ public class ConsoleEditor implements Editor {
     private ArrayList<String> documentLines = new ArrayList<String>();
 
     @Override
-    public void run() {
+    public void run(String[] args) {
         boolean exit = false;
         while (!exit) {
             String commandLine = waitForNewCommand();
@@ -32,25 +35,14 @@ public class ConsoleEditor implements Editor {
             } catch (ExitException e) {
                 exit = true;
             }
-            showDocumentLines(documentLines);
-            showHelp();
-        }
-    }
-
-    private void showDocumentLines(ArrayList<String> textLines) {
-        if (textLines.size() > 0){
-            setTextColor(TEXT_YELLOW);
-            printLnToConsole("START DOCUMENT ==>");
-            for (int index = 0; index < textLines.size(); index++) {
-                StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append("[");
-                stringBuilder.append(index);
-                stringBuilder.append("] ");
-                stringBuilder.append(textLines.get(index));
-                printLnToConsole(stringBuilder.toString());
+            try{
+                SelectionFormat formatSelection = new SelectionFormat();
+                FactoryFormat factory = (FactoryFormat) formatSelection.getFormat(args[0]);
+                Format format = factory.showDocumentLines(documentLines);
+            }catch (BadFormatException e){
+                printErrorToConsole("Invalid command");
             }
-            printLnToConsole("<== END DOCUMENT");
-            setTextColor(TEXT_RESET);
+            showHelp();
         }
     }
 
